@@ -129,6 +129,74 @@
 				"description": "Auth Request w/ bad password"
 			},
 			"response": []
+		},
+		{
+			"name": "Logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e17026f4-8e56-400c-a9b3-b2a6df3ba607",
+						"exec": [
+							"pm.test(\"Status should be 200\", () => {",
+							"    pm.response.to.have.status(200)",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/logout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"logout"
+					]
+				},
+				"description": "Get a resource from an auth-protected endpoint"
+			},
+			"response": []
+		},
+		{
+			"name": "Protected Resource Fail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "e17026f4-8e56-400c-a9b3-b2a6df3ba607",
+						"exec": [
+							"pm.test(\"Status should be 403\", () => {",
+							"    pm.response.to.have.status(403)",
+							"})"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/protected-resource",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"protected-resource"
+					]
+				},
+				"description": "Get a resource from an auth-protected endpoint"
+			},
+			"response": []
 		}
 	]
 }
