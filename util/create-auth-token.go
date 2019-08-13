@@ -32,5 +32,22 @@ func CreateAuthToken(sessionID int, username string, expiry time.Time) string {
 	if err != nil {
 		panic(err)
 	}
-	return rawJWT
+
+	publicKey := &consts.PrivateKey.PublicKey
+	encrypter, err := jose.NewEncrypter(jose.A128GCM, jose.Recipient{Algorithm: jose.RSA_OAEP, Key: publicKey}, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	object, err := encrypter.Encrypt([]byte(rawJWT))
+	if err != nil {
+		panic(err)
+	}
+
+	ecryptedJWT, err := object.CompactSerialize()
+	if err != nil {
+		panic(err)
+	}
+
+	return string(ecryptedJWT)
 }

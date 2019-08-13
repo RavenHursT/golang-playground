@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
+	jose "gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
 	"github.com/ravenhurst/golang-playground/consts"
@@ -17,7 +18,19 @@ func TokenAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return context.NoContent(http.StatusForbidden)
 		}
 
-		parsedJWT, err := jwt.ParseSigned(authCookie.Value)
+		object, err := jose.ParseEncrypted(authCookie.Value)
+		if err != nil {
+			panic(err)
+		}
+
+		decryptedByteArray, err := object.Decrypt(consts.PrivateKey)
+		if err != nil {
+			panic(err)
+		}
+
+		decryptedJWT := string(decryptedByteArray)
+
+		parsedJWT, err := jwt.ParseSigned(decryptedJWT)
 		if err != nil {
 			return context.NoContent(http.StatusBadRequest)
 		}
