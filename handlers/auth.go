@@ -24,7 +24,7 @@ func getSessionIDFromSomePersistance() (n int, err error) {
 func setTokenCookie(context echo.Context, token string, expiry time.Time) {
 	authCookie := new(http.Cookie)
 	authCookie.Name = consts.AUTH_TOKEN_COOKIE_NAME
-	authCookie.Value = token // token.SignedString([]byte(consts.JWT_SIGNING_KEY))
+	authCookie.Value = token
 	authCookie.Expires = expiry
 	authCookie.HttpOnly = true
 	context.SetCookie(authCookie)
