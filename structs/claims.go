@@ -1,11 +1,11 @@
 package structs
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"gopkg.in/square/go-jose.v2/jwt"
 )
 
 type Claims struct {
-	Username string `json:"username"`
-	SessionID int `json:"sessionId"`
-	jwt.StandardClaims
+	*jwt.Claims
+	Username string   `json:"username,omitempty"`
+	SessionID int `json:"sessionId,omitEmpty"`
 }

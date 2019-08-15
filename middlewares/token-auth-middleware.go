@@ -2,17 +2,14 @@ package middlewares
 
 import (
 	"net/http"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
+	jose "gopkg.in/square/go-jose.v2"
+	"gopkg.in/square/go-jose.v2/jwt"
+
 	"github.com/ravenhurst/golang-playground/consts"
 	"github.com/ravenhurst/golang-playground/structs"
 )
-
-func getJwtKey(token *jwt.Token) (interface{}, error) {
-	return []byte(consts.JWT_SIGNING_KEY), nil
-}
 
 func TokenAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
@@ -21,30 +18,27 @@ func TokenAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return context.NoContent(http.StatusForbidden)
 		}
 
-		claims := new(structs.Claims)
-		token, err := jwt.ParseWithClaims(
-			authCookie.Value,
-			claims,
-			getJwtKey,
-		)
+		object, err := jose.ParseEncrypted(authCookie.Value)
+		if err != nil {
+			panic(err)
+		}
 
-		if !token.Valid {
-			// Tell the browser to delete the invalid auth-cookie
-			context.SetCookie(&http.Cookie{
-				Name:     consts.AUTH_TOKEN_COOKIE_NAME,
-				Value:    "",
-				Expires:  time.Unix(0, 0),
-				HttpOnly: true,
-			})
+		decryptedByteArray, err := object.Decrypt(consts.PrivateKey)
+		if err != nil {
+			panic(err)
+		}
 
-			if validationErr, ok := err.(*jwt.ValidationError); ok {
-				tokenExpired := validationErr.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0
-				tokenSignatureInvalid := err == jwt.ErrSignatureInvalid
-				if tokenExpired || tokenSignatureInvalid {
-					return context.NoContent(http.StatusUnauthorized)
-				}
-				return context.NoContent(http.StatusBadRequest)
-			}
+		decryptedJWT := string(decryptedByteArray)
+
+		parsedJWT, err := jwt.ParseSigned(decryptedJWT)
+		if err != nil {
+			return context.NoContent(http.StatusBadRequest)
+		}
+
+		claims := structs.Claims{}
+		err = parsedJWT.Claims(&consts.PrivateKey.PublicKey, &claims)
+		if err != nil {
+			return context.NoContent(http.StatusUnauthorized)
 		}
 
 		if err := next(context); err != nil {
