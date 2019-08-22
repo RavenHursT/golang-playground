@@ -7,5 +7,5 @@ import (
 type Claims struct {
 	*jwt.Claims
 	Username string   `json:"username,omitempty"`
-	SessionID int `json:"sessionId,omitEmpty"`
+	SessionID string `json:"sessionId,omitEmpty"`
 }
