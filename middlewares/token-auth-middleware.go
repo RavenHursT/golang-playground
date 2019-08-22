@@ -2,9 +2,10 @@ package middlewares
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo"
-	jose "gopkg.in/square/go-jose.v2"
+	"gopkg.in/square/go-jose.v2"
 	"gopkg.in/square/go-jose.v2/jwt"
 
 	"github.com/ravenhurst/golang-playground/consts"
@@ -38,7 +39,20 @@ func TokenAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		claims := structs.Claims{}
 		err = parsedJWT.Claims(&consts.PrivateKey.PublicKey, &claims)
 		if err != nil {
-			return context.NoContent(http.StatusUnauthorized)
+			return context.String(http.StatusUnauthorized, "Unauthorized: Could not access token claims")
+		}
+
+		tokenExpiry := *claims.Claims.Expiry
+		now := time.Now()
+		expired := *jwt.NewNumericDate(now) >= tokenExpiry
+		if expired {
+			context.SetCookie(&http.Cookie{
+				Name:     consts.AUTH_TOKEN_COOKIE_NAME,
+				Value:    "",
+				Expires:  time.Unix(0, 0),
+				HttpOnly: true,
+			})
+			return context.String(http.StatusUnauthorized, "UnAuthorized: Auth token expired.")
 		}
 
 		if err := next(context); err != nil {

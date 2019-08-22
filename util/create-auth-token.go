@@ -9,7 +9,7 @@ import (
 	"gopkg.in/square/go-jose.v2/jwt"
 )
 
-func CreateAuthToken(sessionID int, username string, expiry time.Time) string {
+func CreateAuthToken(sessionID string, username string, expiry time.Time) string {
 	var signerOpts = jose.SignerOptions{}
 	signerOpts.WithType("JWT")
 	signer, err := jose.NewSigner(jose.SigningKey{Algorithm: jose.RS256, Key: consts.PrivateKey}, &signerOpts)

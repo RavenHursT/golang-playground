@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"math/rand"
+	//"math/rand"
 	"net/http"
 	"time"
 
@@ -17,8 +17,8 @@ var users = map[string]string{
 	"bar": "barPass",
 }
 
-func getSessionIDFromSomePersistance() (n int, err error) {
-	return rand.Intn(1000000), nil
+func getSessionIDFromSomePersistance() (n string, err error) {
+	return "lQhCEyfPaXMy6xQGwZTkAnbsz9I7kKyy", nil // rand.Intn(1000000), nil
 }
 
 func setTokenCookie(context echo.Context, token string, expiry time.Time) {
@@ -41,7 +41,7 @@ func AuthHandler(context echo.Context) (err error) {
 		return context.NoContent(http.StatusUnauthorized)
 	}
 
-	var sessionID int
+	var sessionID string
 	if sessionID, err = getSessionIDFromSomePersistance(); err != nil {
 		errBody := structs.ErrorResponseBody{
 			Message: "This error might be what came back from persistance",
